@@ -11,53 +11,43 @@ import javazoom.jl.player.advanced.PlaybackListener;
 
 /******************************************************
  * Class SoundManager
- * @author pavlvsmaximvs
- * Handles music and sound effects for the game
+ * 
+ * @author pavlvsmaximvs Handles music and sound effects for the game
  */
 
-public class SoundManager
-{
+public class SoundManager {
 	String soundEffects[] = {};
 	ArrayList<SoundRunner> bgmList = new ArrayList<SoundRunner>();
-	
+
 	public final static SoundManager INSTANCE = new SoundManager();
-	private SoundManager() 
-	{
+
+	private SoundManager() {
 		// Exists only to defeat instantiation.
 	}
-	
-	public void loadSounds()
-	{	
-		for(int i = 0; i < LevelManager.NUM_LEVELS; i++)
-		{
-			try 
-			{
+
+	public void loadSounds() {
+		for (int i = 0; i < LevelManager.NUM_LEVELS; i++) {
+			try {
 				InputStream is = SoundManager.class.getClassLoader().getResourceAsStream("level" + i + ".mp3");
 				BufferedInputStream bis = new BufferedInputStream(is);
 				SoundPlayer player = new SoundPlayer(bis);
 				SoundRunner file = new SoundRunner(player);
 				bgmList.add(file);
-			} 
-			catch(JavaLayerException e) 
-			{
+			} catch (JavaLayerException e) {
 				e.printStackTrace();
 			}
-		}	
+		}
 	}
-				
-	public void startLevelBGM(int levelIndex)
-	{
+
+	public void startLevelBGM(int levelIndex) {
 		bgmList.get(levelIndex).startPlayer();
 	}
-	
-	public void stopLevelBGM(int levelIndex)
-	{
+
+	public void stopLevelBGM(int levelIndex) {
 		bgmList.get(levelIndex).stopPlayer();
 	}
-	
-	
-	public boolean isPaused(int levelIndex)
-	{
+
+	public boolean isPaused(int levelIndex) {
 		return bgmList.get(levelIndex).isPaused();
 	}
 }
