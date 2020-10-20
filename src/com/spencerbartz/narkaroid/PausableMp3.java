@@ -1,11 +1,14 @@
 package com.spencerbartz.narkaroid;
 
+import javazoom.jl.decoder.JavaLayerException;
+
 public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 
+	private boolean isLooped;
+	private boolean isPlaying = false;
 	private String filePath;
 	private PausableMp3Player player;
 	private Thread playerThread;
-	boolean isLooped;
 
 	/**
 	 * Constructor
@@ -20,12 +23,13 @@ public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 	 * play()
 	 */
 	public void play() {
-		if (this.player == null) {
-			this.playerInitialize();
+		if (player == null) {
+			playerInitialize();
 		}
 
-		this.playerThread = new Thread(this, "AudioPlayerThread");
-		this.playerThread.start();
+		playerThread = new Thread(this, "AudioPlayerThread");
+		playerThread.start();
+		isPlaying = true;
 	}
 
 	/**
@@ -33,8 +37,8 @@ public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 	 */
 	private void playerInitialize() {
 		try {
-			String urlAsString = "file:///" + new java.io.File(".").getCanonicalPath() + "/" + this.filePath;
-			this.player = new PausableMp3Player(new java.net.URL(urlAsString), this);
+			String urlStr = "file:///" + new java.io.File(".").getCanonicalPath() + "/" + filePath;
+			player = new PausableMp3Player(new java.net.URL(urlStr), this);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -44,8 +48,8 @@ public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 	 * pauseToggle()
 	 */
 	public void pauseToggle() {
-		if (this.player.isPaused == true) {
-			this.play();
+		if (player.isPaused == true) {
+			play();
 		} else {
 			this.pause();
 		}
@@ -55,16 +59,13 @@ public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 	 * pause()
 	 */
 	public void pause() {
-		this.player.pause();
-
-		// DEPRECATED this.playerThread.stop();
-		// this.playerThread = null;
+		player.pause();
 
 		try {
-			if (this.playerThread != null) {
-				this.playerThread.interrupt();
-				// this.playerThread.join();
-				this.playerThread = null;
+			if (playerThread != null) {
+				playerThread.interrupt();
+				playerThread = null;
+				isPlaying = false;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -75,21 +76,58 @@ public class PausableMp3 implements Mp3PlaybackListener, Runnable {
 	 * stop()
 	 */
 	public void stop() {
-		this.player.stop();
+		player.stop();
+		isPlaying = false;
 	}
 
+	/**
+	 * playbackStarted()
+	 */
 	public void playbackStarted(Mp3PlaybackEvent event) {
+		System.out.println("playbackStarted -- SOURCE: " + event.source + " EVENT TYPE NAME: " + event.eventType.name + " FRAME INDEX: " + event.frameIndex);
 	}
 
+	/**
+	 * playbackStopped()
+	 */
 	public void playbackStopped(Mp3PlaybackEvent event) {
+		System.out.println("playbackStopped -- SOURCE: " + event.source + " EVENT TYPE NAME: " + event.eventType.name + " FRAME INDEX: " + event.frameIndex);
 	}
-
+	
+	/**
+	 * playbackPaused()
+	 */
 	public void playbackPaused(Mp3PlaybackEvent event) {
+		System.out.println("playbackPaused -- SOURCE: " + event.source + " EVENT TYPE NAME: " + event.eventType.name + " FRAME INDEX: " + event.frameIndex);
 	}
 
+	/**
+	 * playbackFinished()
+	 */
 	public void playbackFinished(Mp3PlaybackEvent event) {
+		System.out.println("playbackFinished -- SOURCE: " + event.source + " EVENT TYPE NAME: " + event.eventType.name + " FRAME INDEX: " + event.frameIndex);
+		if (isLooped) {
+			player = null;
+			play();
+		}
 	}
 
+	/**
+	 * run()
+	 */
 	public void run() {
+		try {
+			player.resume();
+		} catch (JavaLayerException ex) {
+			ex.printStackTrace();
+		} 
+	}
+	
+	public boolean isPaused() {
+		return player.isPaused;
+	}
+	
+	public boolean isPlaying() {
+		return isPlaying;
 	}
 }

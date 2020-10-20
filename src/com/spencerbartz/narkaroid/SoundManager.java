@@ -1,24 +1,20 @@
 package com.spencerbartz.narkaroid;
 
-import java.io.InputStream;
-import java.io.BufferedInputStream;
 import java.util.ArrayList;
 
-import javazoom.jl.decoder.JavaLayerException;
-import javazoom.jl.player.advanced.AdvancedPlayer;
-import javazoom.jl.player.advanced.PlaybackEvent;
-import javazoom.jl.player.advanced.PlaybackListener;
 
-/******************************************************
+
+/**
  * Class SoundManager
  * 
- * @author pavlvsmaximvs Handles music and sound effects for the game
+ * @author pavlvsmaximvs 
+ * Handles music and sound effects for the game
  */
 
 public class SoundManager {
-	String soundEffects[] = {};
-	ArrayList<SoundRunner> bgmList = new ArrayList<SoundRunner>();
-
+	private ArrayList<PausableMp3> levelMusicMp3s = new ArrayList<PausableMp3>();
+	private PausableMp3 titleScreenMp3;
+	
 	public final static SoundManager INSTANCE = new SoundManager();
 
 	private SoundManager() {
@@ -27,27 +23,31 @@ public class SoundManager {
 
 	public void loadSounds() {
 		for (int i = 0; i < LevelManager.NUM_LEVELS; i++) {
-			try {
-				InputStream is = SoundManager.class.getClassLoader().getResourceAsStream("level" + i + ".mp3");
-				BufferedInputStream bis = new BufferedInputStream(is);
-				SoundPlayer player = new SoundPlayer(bis);
-				SoundRunner file = new SoundRunner(player);
-				bgmList.add(file);
-			} catch (JavaLayerException e) {
-				e.printStackTrace();
-			}
+			PausableMp3 levelMusic = new PausableMp3("sounds/level" + i + ".mp3", true);
+			levelMusicMp3s.add(levelMusic);
 		}
+		
+		titleScreenMp3 = new PausableMp3("sounds/titlescreen.mp3", true);
+	}
+	
+	public void startTitleScreenMusic() {
+		titleScreenMp3.play();
+	}
+	
+	public boolean isTitleScreenMusicPlaying() {
+		return titleScreenMp3.isPlaying();
 	}
 
 	public void startLevelBGM(int levelIndex) {
-		bgmList.get(levelIndex).startPlayer();
+		levelMusicMp3s.get(levelIndex).play();
 	}
 
 	public void stopLevelBGM(int levelIndex) {
-		bgmList.get(levelIndex).stopPlayer();
+		// bgmList.get(levelIndex).stopPlayer();
 	}
 
 	public boolean isPaused(int levelIndex) {
-		return bgmList.get(levelIndex).isPaused();
+		// return bgmList.get(levelIndex).isPaused();
+		return false;
 	}
 }

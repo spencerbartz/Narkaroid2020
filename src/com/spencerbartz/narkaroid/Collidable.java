@@ -1,7 +1,6 @@
 package com.spencerbartz.narkaroid;
 
-public interface Collidable 
-{
+public interface Collidable {
 	public void collide(Collidable c);
 	public void react(int reactionCode);
 	public int getXCoord();
